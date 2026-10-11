@@ -19,6 +19,17 @@ const LABELS = {
   pricing: 'Pricing',
   final: 'Final call'
 };
+const SHORT = {
+  hero: 'Hero',
+  offer: 'Offer',
+  process: 'How',
+  proof: 'Proof',
+  founder: 'Founder',
+  guarantee: 'Guar.',
+  scarcity: 'Spots',
+  pricing: 'Pricing',
+  final: 'Final'
+};
 
 const app = express();
 app.use(express.json({ limit: '32kb' }));
@@ -91,7 +102,23 @@ async function record(body) {
   await visits.updateOne({ visitId: visitId }, update);
 }
 
-function summarize(rows) {
+function rangeStart(range) {
+  const now = new Date();
+  if (range === 'today') {
+    const start = new Date(now);
+    start.setHours(0, 0, 0, 0);
+    return start;
+  }
+  if (range === '7d') return new Date(now.getTime() - 7 * 86400000);
+  if (range === '30d') return new Date(now.getTime() - 30 * 86400000);
+  return null;
+}
+
+function dayKey(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function summarize(rows, range) {
   const totals = {};
   const reached = {};
   SECTIONS.forEach(function (id) {
@@ -99,22 +126,46 @@ function summarize(rows) {
     reached[id] = 0;
   });
   const pathCounts = {};
+  let timeSum = 0;
+  let sectionSum = 0;
+  let finalCount = 0;
+  const buckets = {};
+
   rows.forEach(function (visit) {
     const seen = new Set(visit.path || []);
+    const dwell = visit.dwell || {};
+    let visitMs = 0;
     SECTIONS.forEach(function (id) {
-      totals[id] += Number((visit.dwell && visit.dwell[id]) || 0);
+      const ms = Number(dwell[id] || 0);
+      totals[id] += ms;
+      visitMs += ms;
       if (seen.has(id)) reached[id] += 1;
     });
+    timeSum += visitMs;
+    sectionSum += (visit.path || []).length;
+    if (seen.has('final')) finalCount += 1;
     const key = (visit.path || []).join('>');
     if (key) pathCounts[key] = (pathCounts[key] || 0) + 1;
+
+    const when = new Date(visit.createdAt || visit.updatedAt || Date.now());
+    const bucket = range === 'today' ? String(when.getHours()).padStart(2, '0') : dayKey(when);
+    if (!buckets[bucket]) buckets[bucket] = { visits: 0, ms: 0, sections: 0, finals: 0 };
+    buckets[bucket].visits += 1;
+    buckets[bucket].ms += visitMs;
+    buckets[bucket].sections += (visit.path || []).length;
+    if (seen.has('final')) buckets[bucket].finals += 1;
   });
+
   const visitCount = rows.length;
+  const allMs = SECTIONS.reduce(function (sum, id) { return sum + totals[id]; }, 0);
   const sections = SECTIONS.map(function (id) {
     const visitors = reached[id];
     return {
       id: id,
       label: LABELS[id],
+      short: SHORT[id],
       totalMs: totals[id],
+      share: allMs ? Math.round((totals[id] / allMs) * 1000) / 10 : 0,
       avgMs: visitors ? Math.round(totals[id] / visitors) : 0,
       visitors: visitors,
       reach: visitCount ? Math.round((visitors / visitCount) * 100) : 0
@@ -122,28 +173,55 @@ function summarize(rows) {
   });
   const paths = Object.keys(pathCounts)
     .map(function (key) {
+      const ids = key.split('>');
       return {
-        path: key.split('>').map(function (id) { return LABELS[id] || id; }),
-        count: pathCounts[key]
+        ids: ids,
+        path: ids.map(function (id) { return SHORT[id] || id; }),
+        count: pathCounts[key],
+        share: visitCount ? Math.round((pathCounts[key] / visitCount) * 1000) / 10 : 0
       };
     })
     .sort(function (a, b) { return b.count - a.count; })
-    .slice(0, 8);
+    .slice(0, 6);
   const recent = rows
     .slice()
-    .sort(function (a, b) { return new Date(b.updatedAt) - new Date(a.updatedAt); })
-    .slice(0, 12)
+    .sort(function (a, b) { return new Date(b.createdAt || b.updatedAt) - new Date(a.createdAt || a.updatedAt); })
+    .slice(0, 20)
     .map(function (visit) {
       const dwell = visit.dwell || {};
-      const totalMs = Object.keys(dwell).reduce(function (sum, key) { return sum + Number(dwell[key] || 0); }, 0);
+      const seen = new Set(visit.path || []);
+      const totalMs = SECTIONS.reduce(function (sum, id) { return sum + Number(dwell[id] || 0); }, 0);
+      const compact = String(visit.visitId || '').replace(/-/g, '').slice(0, 6);
       return {
-        id: visit.visitId.slice(0, 8),
-        when: visit.updatedAt,
+        id: 'v_' + compact,
+        started: visit.createdAt || visit.updatedAt,
         totalMs: totalMs,
-        path: (visit.path || []).map(function (id) { return LABELS[id] || id; })
+        depth: SECTIONS.map(function (id) { return seen.has(id); }),
+        path: (visit.path || []).map(function (id) { return SHORT[id] || id; }),
+        times: SECTIONS.map(function (id) { return { label: SHORT[id], ms: Number(dwell[id] || 0) }; })
       };
     });
-  return { visits: visitCount, sections: sections, paths: paths, recent: recent };
+  const sparkKeys = Object.keys(buckets).sort();
+  const spark = {
+    visits: sparkKeys.map(function (key) { return buckets[key].visits; }),
+    avgMs: sparkKeys.map(function (key) { return buckets[key].visits ? Math.round(buckets[key].ms / buckets[key].visits) : 0; }),
+    avgSections: sparkKeys.map(function (key) { return buckets[key].visits ? Math.round((buckets[key].sections / buckets[key].visits) * 10) / 10 : 0; }),
+    finalReach: sparkKeys.map(function (key) { return buckets[key].visits ? Math.round((buckets[key].finals / buckets[key].visits) * 100) : 0; })
+  };
+  return {
+    range: range,
+    generatedAt: new Date().toISOString(),
+    visits: visitCount,
+    avgTimeMs: visitCount ? Math.round(timeSum / visitCount) : 0,
+    avgSections: visitCount ? Math.round((sectionSum / visitCount) * 10) / 10 : 0,
+    finalCount: finalCount,
+    finalReach: visitCount ? Math.round((finalCount / visitCount) * 100) : 0,
+    totalMs: allMs,
+    sections: sections,
+    paths: paths,
+    recent: recent,
+    spark: spark
+  };
 }
 
 app.post('/api/track', async function (req, res) {
@@ -158,8 +236,11 @@ app.post('/api/track', async function (req, res) {
 
 app.get('/api/stats', async function (req, res) {
   if (!visits) return res.status(503).json({ error: 'Add your MongoDB link to the .env file, then restart the server.' });
-  const rows = await visits.find({}).limit(5000).toArray();
-  res.json(summarize(rows));
+  const range = ['today', '7d', '30d', 'all'].includes(req.query.range) ? req.query.range : '30d';
+  const start = rangeStart(range);
+  const query = start ? { createdAt: { $gte: start } } : {};
+  const rows = await visits.find(query).limit(5000).toArray();
+  res.json(summarize(rows, range));
 });
 
 app.get('/dashboard', function (req, res) {

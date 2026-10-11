@@ -3,100 +3,302 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Visit time — Xieny</title>
+<title>30-Day Full-Chair Launch — Analytics</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
 <style>
-:root{ --navy:#0B2447; --silver:#6D7F94; --blue:#387ADF; --white:#FFFFFF; --gray:#F5F7FA; }
+:root{
+  --bg:#F4F7FB; --card:#fff; --ink:#12233F; --muted:#8B97A8; --line:#E6EDF5;
+  --blue:#3B82F6; --blue-2:#2563EB; --navy:#1E3A8A; --soft:#E8F0FE;
+}
 *{box-sizing:border-box}
-body{ margin:0; background:var(--gray); color:var(--navy); font-family:'Public Sans',system-ui,sans-serif; }
-h1,h2{ font-family:'Fraunces',Georgia,serif; font-weight:600; margin:0; }
-.wrap{ max-width:1100px; margin:0 auto; padding:32px 20px 64px; }
-.top{ display:flex; justify-content:space-between; gap:16px; align-items:flex-end; flex-wrap:wrap; }
-.top p{ color:var(--silver); margin:8px 0 0; }
-.stat{ background:var(--navy); color:#fff; border-radius:14px; padding:18px 22px; min-width:160px; }
-.stat b{ display:block; font-family:'Fraunces',serif; font-size:2rem; font-weight:600; }
-.stat span{ color:rgba(255,255,255,.7); font-size:.85rem; }
-.grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:22px; }
-@media (max-width:800px){ .grid{ grid-template-columns:1fr; } }
-.card{ background:#fff; border:1px solid rgba(109,127,148,.45); border-radius:14px; padding:18px 18px 8px; }
-.card h2{ font-size:1.15rem; margin-bottom:8px; }
-.card.wide{ grid-column:1 / -1; }
-.note{ margin-top:18px; background:#fff; border-radius:14px; padding:18px; color:var(--silver); }
-table{ width:100%; border-collapse:collapse; font-size:.92rem; }
-th,td{ text-align:left; padding:10px 8px; border-bottom:1px solid var(--gray); vertical-align:top; }
-th{ color:var(--silver); font-size:.75rem; letter-spacing:.04em; text-transform:uppercase; }
-.path{ display:flex; flex-wrap:wrap; gap:6px; }
-.pill{ background:var(--gray); color:var(--navy); border-radius:99px; padding:3px 8px; font-size:.78rem; font-weight:700; }
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;}
+button,input{font-family:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 22px 56px;}
+.kicker{color:var(--blue-2);font-size:.72rem;font-weight:700;letter-spacing:.08em;}
+.head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;flex-wrap:wrap;}
+h1{margin:6px 0 0;font-size:1.7rem;letter-spacing:-.03em;}
+.sub{margin:6px 0 0;color:var(--muted);font-size:.92rem;}
+.tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.ranges{display:flex;background:#fff;border-radius:12px;padding:4px;box-shadow:0 1px 2px rgba(18,35,63,.05);}
+.ranges button{border:0;background:transparent;color:var(--muted);font-weight:600;font-size:.85rem;padding:8px 12px;border-radius:9px;cursor:pointer;}
+.ranges button.on{background:var(--blue-2);color:#fff;}
+.fresh{color:var(--muted);font-size:.8rem;display:flex;align-items:center;gap:6px;}
+.fresh i{width:7px;height:7px;border-radius:50%;background:#3DDC97;display:inline-block;}
+.refresh{border:0;background:var(--blue-2);color:#fff;font-weight:700;border-radius:10px;padding:9px 14px;cursor:pointer;}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px;}
+.kpi,.card{background:var(--card);border-radius:16px;box-shadow:0 8px 24px rgba(18,35,63,.04);}
+.kpi{padding:16px 16px 12px;display:grid;grid-template-columns:1fr 92px;gap:8px;align-items:center;}
+.kpi .lbl{color:var(--muted);font-size:.68rem;font-weight:700;letter-spacing:.06em;}
+.kpi strong{display:block;font-size:1.7rem;letter-spacing:-.03em;margin-top:4px;}
+.kpi strong small{font-size:.95rem;color:var(--muted);font-weight:600;}
+.kpi em{display:block;margin-top:4px;color:var(--muted);font-style:normal;font-size:.78rem;}
+.grid{display:grid;grid-template-columns:1fr 1.15fr;gap:14px;margin-top:14px;}
+.card{padding:18px 18px 16px;}
+.card h2{margin:0;font-size:1rem;}
+.card .hint{margin-left:auto;color:var(--muted);font-size:.75rem;}
+.card-top{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;}
+.donut-wrap{display:grid;grid-template-columns:210px 1fr;gap:8px;align-items:center;}
+.donut{position:relative;height:210px;}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;}
+.donut-center b{font-size:1.55rem;letter-spacing:-.03em;}
+.donut-center span{color:var(--muted);font-size:.75rem;}
+.legend{display:flex;flex-direction:column;gap:7px;font-size:.84rem;}
+.legend div{display:grid;grid-template-columns:14px 1fr auto auto;gap:8px;align-items:center;}
+.swatch{width:9px;height:9px;border-radius:3px;}
+.legend .time,.legend .share{color:var(--muted);font-variant-numeric:tabular-nums;}
+.legend .share{width:42px;text-align:right;}
+.avg{height:250px;}
+.reach-row{display:grid;grid-template-columns:72px 1fr 42px;gap:10px;align-items:center;margin:8px 0;}
+.reach-row span{font-size:.84rem;}
+.track{background:#EEF3FA;border-radius:8px;height:28px;position:relative;}
+.bar{height:100%;border-radius:8px;min-width:28px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;color:#fff;font-size:.78rem;font-weight:700;}
+.pct{text-align:right;color:var(--muted);font-size:.8rem;}
+.path-row{display:grid;grid-template-columns:18px 1fr auto;gap:10px;align-items:center;margin:11px 0;font-size:.84rem;}
+.path-track{height:8px;background:#EAF1FB;border-radius:99px;overflow:hidden;}
+.path-track i{display:block;height:100%;background:var(--blue);border-radius:99px;}
+.path-meta{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.wide{grid-column:1 / -1;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;font-size:.68rem;letter-spacing:.05em;color:var(--muted);padding:8px 8px 10px;}
+td{padding:12px 8px;border-top:1px solid var(--line);font-size:.88rem;vertical-align:middle;}
+tr.visit{cursor:pointer;}
+tr.visit:hover td{background:#F8FBFF;}
+.depth{display:flex;gap:3px;}
+.depth i{width:8px;height:16px;border-radius:2px;background:#E6EDF5;}
+.depth i.on{background:var(--blue-2);}
+.pills{display:flex;flex-wrap:wrap;gap:6px;}
+.pill{background:#EAF2FF;color:#3B6FD8;border-radius:99px;padding:3px 8px;font-size:.75rem;font-weight:600;}
+.total{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;}
+.detail td{background:#F8FBFF;color:var(--muted);font-size:.8rem;}
+.note{margin-top:14px;background:#fff;border-radius:14px;padding:16px;color:var(--muted);}
+@media (max-width:980px){
+  .kpis,.grid,.donut-wrap{grid-template-columns:1fr;}
+  .donut{height:220px;}
+}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="top">
+  <div class="head">
     <div>
-      <h1>How long visitors stay</h1>
-      <p>Total time, average time, and the order of sections in each visit.</p>
+      <div class="kicker">ANONYMOUS VISITOR ANALYTICS</div>
+      <h1>30-Day Full-Chair Launch</h1>
+      <p class="sub">Section-level engagement across the nine page sections. Visible tab time only.</p>
     </div>
-    <div class="stat"><b id="visit-count">—</b><span>visits recorded</span></div>
+    <div class="tools">
+      <div class="ranges" id="ranges">
+        <button data-range="today">Today</button>
+        <button data-range="7d">7 days</button>
+        <button data-range="30d" class="on">30 days</button>
+        <button data-range="all">All</button>
+      </div>
+      <div class="fresh"><i></i><span id="updated">Updated just now</span></div>
+      <button class="refresh" id="refresh" type="button">Refresh</button>
+    </div>
   </div>
+
   <div id="waiting" class="note" hidden></div>
-  <div id="charts" class="grid" hidden>
-    <div class="card"><h2>Total time</h2><canvas id="total-chart"></canvas></div>
-    <div class="card"><h2>Average time</h2><canvas id="avg-chart"></canvas></div>
-    <div class="card"><h2>Who reached each section</h2><canvas id="reach-chart"></canvas></div>
-    <div class="card"><h2>Most common paths</h2><canvas id="path-chart"></canvas></div>
-    <div class="card wide">
-      <h2>Latest visits, in the order they were seen</h2>
-      <table>
-        <thead><tr><th>Visit</th><th>Time on page</th><th>Order</th></tr></thead>
-        <tbody id="recent"></tbody>
-      </table>
+
+  <div id="board">
+    <div class="kpis">
+      <article class="kpi"><div><div class="lbl">TOTAL VISITS</div><strong id="kpi-visits">0</strong><em>Anonymous browsers</em></div><canvas id="spark-visits"></canvas></article>
+      <article class="kpi"><div><div class="lbl">AVG TIME ON PAGE</div><strong id="kpi-time">0:00</strong><em>Visible tab time only</em></div><canvas id="spark-time"></canvas></article>
+      <article class="kpi"><div><div class="lbl">AVG SECTIONS REACHED</div><strong id="kpi-sections">0.0 <small>/ 9</small></strong><em>Per visit</em></div><canvas id="spark-sections"></canvas></article>
+      <article class="kpi"><div><div class="lbl">REACHED FINAL CALL</div><strong id="kpi-final">0%</strong><em id="kpi-final-sub">0 of 0 visits</em></div><canvas id="spark-final"></canvas></article>
+    </div>
+
+    <div class="grid">
+      <section class="card">
+        <div class="card-top"><h2>Total time on each section</h2><span class="hint">Share of all time</span></div>
+        <div class="donut-wrap">
+          <div class="donut">
+            <canvas id="total-chart"></canvas>
+            <div class="donut-center"><b id="total-center">0:00</b><span>h:mm total</span></div>
+          </div>
+          <div class="legend" id="legend"></div>
+        </div>
+      </section>
+      <section class="card">
+        <div class="card-top"><h2>Average time on each section</h2><span class="hint">Seconds per visit that reached it</span></div>
+        <div class="avg"><canvas id="avg-chart"></canvas></div>
+      </section>
+      <section class="card">
+        <div class="card-top"><h2>Visits that reached each section</h2><span class="hint">Visits · share of all</span></div>
+        <div id="reach"></div>
+      </section>
+      <section class="card">
+        <div class="card-top"><h2>Most common paths</h2><span class="hint">Order first seen</span></div>
+        <div id="paths"></div>
+      </section>
+      <section class="card wide">
+        <div class="card-top"><h2>Latest visits</h2><span class="hint">Most recent 20 · click a row for time per section</span></div>
+        <table>
+          <thead><tr><th>VISIT ID</th><th>STARTED</th><th>DEPTH</th><th>SECTION ORDER</th><th class="total">TOTAL TIME</th></tr></thead>
+          <tbody id="recent"></tbody>
+        </table>
+      </section>
     </div>
   </div>
 </div>
 <script>
-var charts = [];
-function minutes(ms){ return Math.round((ms / 60000) * 10) / 10; }
+var range = '30d';
+var charts = {};
+var loadedAt = Date.now();
+var COLORS = ['#1E3A8A','#2563EB','#3B82F6','#60A5FA','#93C5FD','#BFDBFE','#1D4ED8','#1E40AF','#172554'];
+
 function clock(ms){
-  var s = Math.round(ms / 1000);
-  var m = Math.floor(s / 60);
+  var s = Math.round((ms || 0) / 1000);
+  var h = Math.floor(s / 3600);
+  var m = Math.floor((s % 3600) / 60);
   s = s % 60;
-  return m + 'm ' + s + 's';
+  function pad(n){ return String(n).padStart(2, '0'); }
+  if (h) return h + ':' + pad(m) + ':' + pad(s);
+  return m + ':' + pad(s);
 }
-function makeChart(id, labels, data, color){
-  return new Chart(document.getElementById(id), {
+function hm(ms){
+  var total = Math.round((ms || 0) / 60000);
+  var h = Math.floor(total / 60);
+  var m = total % 60;
+  return h + ':' + String(m).padStart(2, '0');
+}
+function whenLabel(iso){
+  var date = new Date(iso);
+  var now = new Date();
+  var startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  var startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  var day = Math.round((startToday - startDate) / 86400000);
+  var hmText = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+  if (day === 0) return 'Today ' + hmText;
+  if (day === 1) return 'Yesterday ' + hmText;
+  return date.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + hmText;
+}
+function spark(id, values){
+  if (charts[id]) charts[id].destroy();
+  charts[id] = new Chart(document.getElementById(id), {
+    type: 'line',
+    data: { labels: values.map(function(_, i){ return i; }), datasets: [{ data: values.length ? values : [0], borderColor: '#60A5FA', borderWidth: 2, pointRadius: 0, tension: 0.35, fill: false }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } }
+  });
+}
+function drawAvg(sections){
+  if (charts.avg) charts.avg.destroy();
+  var max = 0;
+  sections.forEach(function(s){ if (s.avgMs > max) max = s.avgMs; });
+  charts.avg = new Chart(document.getElementById('avg-chart'), {
     type: 'bar',
-    data: { labels: labels, datasets: [{ data: data, backgroundColor: color, borderRadius: 6 }] },
+    data: {
+      labels: sections.map(function(s){ return s.short; }),
+      datasets: [{
+        data: sections.map(function(s){ return Math.round(s.avgMs / 1000); }),
+        backgroundColor: sections.map(function(s){ return s.avgMs && s.avgMs === max ? '#1E3A8A' : '#3B82F6'; }),
+        borderRadius: 7,
+        maxBarThickness: 34
+      }]
+    },
     options: {
+      layout: { padding: { top: 18 } },
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: '#6D7F94' }, grid: { display: false } },
-        y: { ticks: { color: '#6D7F94' }, grid: { color: '#F5F7FA' }, beginAtZero: true }
+        x: { grid: { display: false }, ticks: { color: '#8B97A8', font: { size: 11 } } },
+        y: { beginAtZero: true, grid: { color: '#EEF3F8' }, ticks: { color: '#8B97A8', callback: function(v){ return v + 's'; } } }
       }
-    }
+    },
+    plugins: [{
+      id: 'seconds',
+      afterDatasetsDraw: function(chart){
+        var ctx = chart.ctx;
+        ctx.save();
+        ctx.fillStyle = '#12233F';
+        ctx.font = '600 11px Inter';
+        ctx.textAlign = 'center';
+        chart.getDatasetMeta(0).data.forEach(function(bar, i){
+          ctx.fillText(chart.data.datasets[0].data[i] + 's', bar.x, bar.y - 6);
+        });
+        ctx.restore();
+      }
+    }]
+  });
+}
+function drawDonut(sections){
+  if (charts.donut) charts.donut.destroy();
+  var values = sections.map(function(s){ return s.totalMs; });
+  var empty = values.every(function(v){ return !v; });
+  charts.donut = new Chart(document.getElementById('total-chart'), {
+    type: 'doughnut',
+    data: {
+      labels: sections.map(function(s){ return s.label; }),
+      datasets: [{ data: empty ? [1] : values, backgroundColor: empty ? ['#E6EDF5'] : COLORS, borderWidth: 3, borderColor: '#fff', hoverOffset: 4 }]
+    },
+    options: { cutout: '68%', plugins: { legend: { display: false }, tooltip: { enabled: !empty } } }
+  });
+  document.getElementById('legend').innerHTML = sections.map(function(s, i){
+    return '<div><i class="swatch" style="background:' + COLORS[i] + '"></i><span>' + s.label + '</span><span class="time">' + clock(s.totalMs) + '</span><span class="share">' + s.share.toFixed(1) + '%</span></div>';
+  }).join('');
+}
+function drawReach(sections){
+  var max = 1;
+  sections.forEach(function(s){ if (s.visitors > max) max = s.visitors; });
+  document.getElementById('reach').innerHTML = sections.map(function(s, i){
+    var width = Math.max(8, Math.round((s.visitors / max) * 100));
+    return '<div class="reach-row"><span>' + s.short + '</span><div class="track"><div class="bar" style="width:' + width + '%;background:' + COLORS[i] + '">' + s.visitors + '</div></div><span class="pct">' + s.reach + '%</span></div>';
+  }).join('');
+}
+function drawPaths(paths){
+  if (!paths.length) {
+    document.getElementById('paths').innerHTML = '<p class="sub">No paths yet.</p>';
+    return;
+  }
+  var max = paths[0].count || 1;
+  document.getElementById('paths').innerHTML = paths.map(function(item, i){
+    var width = Math.max(6, Math.round((item.count / max) * 100));
+    return '<div class="path-row"><span>' + (i + 1) + '</span><div><div>' + item.path.join(' → ') + '</div><div class="path-track"><i style="width:' + width + '%"></i></div></div><span class="path-meta">' + item.count + '&nbsp;&nbsp;' + item.share.toFixed(1) + '%</span></div>';
+  }).join('');
+}
+function drawRecent(rows){
+  var body = document.getElementById('recent');
+  if (!rows.length) {
+    body.innerHTML = '<tr><td colspan="5">No visits in this range yet.</td></tr>';
+    return;
+  }
+  body.innerHTML = rows.map(function(visit, index){
+    var depth = visit.depth.map(function(on){ return '<i class="' + (on ? 'on' : '') + '"></i>'; }).join('');
+    var pills = visit.path.map(function(name){ return '<span class="pill">' + name + '</span>'; }).join('');
+    var times = visit.times.map(function(item){ return item.label + ' ' + clock(item.ms); }).join(' · ');
+    return '<tr class="visit" data-row="' + index + '"><td>' + visit.id + '</td><td>' + whenLabel(visit.started) + '</td><td><div class="depth">' + depth + '</div></td><td><div class="pills">' + pills + '</div></td><td class="total">' + clock(visit.totalMs) + '</td></tr>' +
+      '<tr class="detail" id="detail-' + index + '" hidden><td colspan="5">' + times + '</td></tr>';
+  }).join('');
+  body.querySelectorAll('.visit').forEach(function(row){
+    row.addEventListener('click', function(){
+      var detail = document.getElementById('detail-' + row.getAttribute('data-row'));
+      detail.hidden = !detail.hidden;
+    });
   });
 }
 function render(data){
-  charts.forEach(function(chart){ chart.destroy(); });
-  charts = [];
-  document.getElementById('visit-count').textContent = data.visits;
-  document.getElementById('charts').hidden = false;
-  var labels = data.sections.map(function(s){ return s.label; });
-  charts.push(makeChart('total-chart', labels, data.sections.map(function(s){ return minutes(s.totalMs); }), '#387ADF'));
-  charts.push(makeChart('avg-chart', labels, data.sections.map(function(s){ return minutes(s.avgMs); }), '#0B2447'));
-  charts.push(makeChart('reach-chart', labels, data.sections.map(function(s){ return s.reach; }), '#6D7F94'));
-  var pathLabels = data.paths.map(function(item){ return item.path.join(' → '); });
-  charts.push(makeChart('path-chart', pathLabels.length ? pathLabels : ['No paths yet'], data.paths.map(function(item){ return item.count; }), '#387ADF'));
-  var body = document.getElementById('recent');
-  body.innerHTML = data.recent.map(function(visit){
-    var pills = visit.path.map(function(name){ return '<span class="pill">' + name + '</span>'; }).join('');
-    return '<tr><td>' + visit.id + '</td><td>' + clock(visit.totalMs) + '</td><td><div class="path">' + pills + '</div></td></tr>';
-  }).join('') || '<tr><td colspan="3">No visits yet. Open the landing page and scroll.</td></tr>';
+  document.getElementById('waiting').hidden = true;
+  document.getElementById('kpi-visits').textContent = data.visits;
+  document.getElementById('kpi-time').textContent = clock(data.avgTimeMs);
+  document.getElementById('kpi-sections').innerHTML = data.avgSections.toFixed(1) + ' <small>/ 9</small>';
+  document.getElementById('kpi-final').textContent = data.finalReach + '%';
+  document.getElementById('kpi-final-sub').textContent = data.finalCount + ' of ' + data.visits + ' visits';
+  document.getElementById('total-center').textContent = hm(data.totalMs);
+  spark('spark-visits', data.spark.visits);
+  spark('spark-time', data.spark.avgMs);
+  spark('spark-sections', data.spark.avgSections);
+  spark('spark-final', data.spark.finalReach);
+  drawDonut(data.sections);
+  drawAvg(data.sections);
+  drawReach(data.sections);
+  drawPaths(data.paths);
+  drawRecent(data.recent);
+  loadedAt = Date.now();
+  document.getElementById('updated').textContent = 'Updated just now';
 }
 function load(){
-  fetch('/api/stats').then(function(res){
+  fetch('/api/stats?range=' + range).then(function(res){
     if (!res.ok) return res.json().then(function(body){ throw new Error(body.error || 'Unavailable'); });
     return res.json();
   }).then(render).catch(function(error){
@@ -105,8 +307,19 @@ function load(){
     note.textContent = error.message;
   });
 }
+document.getElementById('ranges').addEventListener('click', function(event){
+  var button = event.target.closest('button');
+  if (!button) return;
+  range = button.getAttribute('data-range');
+  document.querySelectorAll('#ranges button').forEach(function(item){ item.classList.toggle('on', item === button); });
+  load();
+});
+document.getElementById('refresh').addEventListener('click', load);
+setInterval(function(){
+  var mins = Math.round((Date.now() - loadedAt) / 60000);
+  document.getElementById('updated').textContent = mins < 1 ? 'Updated just now' : 'Updated ' + mins + ' min ago';
+}, 15000);
 load();
-setInterval(load, 20000);
 </script>
 </body>
 </html>

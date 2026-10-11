@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Visit time — Xieny</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+<style>
+:root{ --navy:#0B2447; --silver:#6D7F94; --blue:#387ADF; --white:#FFFFFF; --gray:#F5F7FA; }
+*{box-sizing:border-box}
+body{ margin:0; background:var(--gray); color:var(--navy); font-family:'Public Sans',system-ui,sans-serif; }
+h1,h2{ font-family:'Fraunces',Georgia,serif; font-weight:600; margin:0; }
+.wrap{ max-width:1100px; margin:0 auto; padding:32px 20px 64px; }
+.top{ display:flex; justify-content:space-between; gap:16px; align-items:flex-end; flex-wrap:wrap; }
+.top p{ color:var(--silver); margin:8px 0 0; }
+.stat{ background:var(--navy); color:#fff; border-radius:14px; padding:18px 22px; min-width:160px; }
+.stat b{ display:block; font-family:'Fraunces',serif; font-size:2rem; font-weight:600; }
+.stat span{ color:rgba(255,255,255,.7); font-size:.85rem; }
+.grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:22px; }
+@media (max-width:800px){ .grid{ grid-template-columns:1fr; } }
+.card{ background:#fff; border:1px solid rgba(109,127,148,.45); border-radius:14px; padding:18px 18px 8px; }
+.card h2{ font-size:1.15rem; margin-bottom:8px; }
+.card.wide{ grid-column:1 / -1; }
+.note{ margin-top:18px; background:#fff; border-radius:14px; padding:18px; color:var(--silver); }
+table{ width:100%; border-collapse:collapse; font-size:.92rem; }
+th,td{ text-align:left; padding:10px 8px; border-bottom:1px solid var(--gray); vertical-align:top; }
+th{ color:var(--silver); font-size:.75rem; letter-spacing:.04em; text-transform:uppercase; }
+.path{ display:flex; flex-wrap:wrap; gap:6px; }
+.pill{ background:var(--gray); color:var(--navy); border-radius:99px; padding:3px 8px; font-size:.78rem; font-weight:700; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>How long visitors stay</h1>
+      <p>Total time, average time, and the order of sections in each visit.</p>
+    </div>
+    <div class="stat"><b id="visit-count">—</b><span>visits recorded</span></div>
+  </div>
+  <div id="waiting" class="note" hidden></div>
+  <div id="charts" class="grid" hidden>
+    <div class="card"><h2>Total time</h2><canvas id="total-chart"></canvas></div>
+    <div class="card"><h2>Average time</h2><canvas id="avg-chart"></canvas></div>
+    <div class="card"><h2>Who reached each section</h2><canvas id="reach-chart"></canvas></div>
+    <div class="card"><h2>Most common paths</h2><canvas id="path-chart"></canvas></div>
+    <div class="card wide">
+      <h2>Latest visits, in the order they were seen</h2>
+      <table>
+        <thead><tr><th>Visit</th><th>Time on page</th><th>Order</th></tr></thead>
+        <tbody id="recent"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script>
+var charts = [];
+function minutes(ms){ return Math.round((ms / 60000) * 10) / 10; }
+function clock(ms){
+  var s = Math.round(ms / 1000);
+  var m = Math.floor(s / 60);
+  s = s % 60;
+  return m + 'm ' + s + 's';
+}
+function makeChart(id, labels, data, color){
+  return new Chart(document.getElementById(id), {
+    type: 'bar',
+    data: { labels: labels, datasets: [{ data: data, backgroundColor: color, borderRadius: 6 }] },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#6D7F94' }, grid: { display: false } },
+        y: { ticks: { color: '#6D7F94' }, grid: { color: '#F5F7FA' }, beginAtZero: true }
+      }
+    }
+  });
+}
+function render(data){
+  charts.forEach(function(chart){ chart.destroy(); });
+  charts = [];
+  document.getElementById('visit-count').textContent = data.visits;
+  document.getElementById('charts').hidden = false;
+  var labels = data.sections.map(function(s){ return s.label; });
+  charts.push(makeChart('total-chart', labels, data.sections.map(function(s){ return minutes(s.totalMs); }), '#387ADF'));
+  charts.push(makeChart('avg-chart', labels, data.sections.map(function(s){ return minutes(s.avgMs); }), '#0B2447'));
+  charts.push(makeChart('reach-chart', labels, data.sections.map(function(s){ return s.reach; }), '#6D7F94'));
+  var pathLabels = data.paths.map(function(item){ return item.path.join(' → '); });
+  charts.push(makeChart('path-chart', pathLabels.length ? pathLabels : ['No paths yet'], data.paths.map(function(item){ return item.count; }), '#387ADF'));
+  var body = document.getElementById('recent');
+  body.innerHTML = data.recent.map(function(visit){
+    var pills = visit.path.map(function(name){ return '<span class="pill">' + name + '</span>'; }).join('');
+    return '<tr><td>' + visit.id + '</td><td>' + clock(visit.totalMs) + '</td><td><div class="path">' + pills + '</div></td></tr>';
+  }).join('') || '<tr><td colspan="3">No visits yet. Open the landing page and scroll.</td></tr>';
+}
+function load(){
+  fetch('/api/stats').then(function(res){
+    if (!res.ok) return res.json().then(function(body){ throw new Error(body.error || 'Unavailable'); });
+    return res.json();
+  }).then(render).catch(function(error){
+    var note = document.getElementById('waiting');
+    note.hidden = false;
+    note.textContent = error.message;
+  });
+}
+load();
+setInterval(load, 20000);
+</script>
+</body>
+</html>

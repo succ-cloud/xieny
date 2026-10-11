@@ -1,0 +1,12 @@
+{
+  "name": "xieny-tracking",
+  "private": true,
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "mongodb": "^6.18.0"
+  }
+}

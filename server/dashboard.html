@@ -6,7 +6,7 @@
 <title>30-Day Full-Chair Launch — Analytics</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
 <style>
 :root{
@@ -14,12 +14,12 @@
   --blue:#3B82F6; --blue-2:#2563EB; --navy:#1E3A8A; --soft:#E8F0FE;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Plus Jakarta Sans",system-ui,sans-serif;}
 button,input{font-family:inherit}
 .wrap{max-width:1180px;margin:0 auto;padding:28px 22px 56px;}
 .kicker{color:var(--blue-2);font-size:.72rem;font-weight:700;letter-spacing:.08em;}
 .head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;flex-wrap:wrap;}
-h1{margin:6px 0 0;font-size:1.7rem;letter-spacing:-.03em;}
+h1{margin:6px 0 0;font-size:1.85rem;font-weight:800;letter-spacing:-.04em;}
 .sub{margin:6px 0 0;color:var(--muted);font-size:.92rem;}
 .tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .ranges{display:flex;background:#fff;border-radius:12px;padding:4px;box-shadow:0 1px 2px rgba(18,35,63,.05);}
@@ -28,13 +28,17 @@ h1{margin:6px 0 0;font-size:1.7rem;letter-spacing:-.03em;}
 .fresh{color:var(--muted);font-size:.8rem;display:flex;align-items:center;gap:6px;}
 .fresh i{width:7px;height:7px;border-radius:50%;background:#3DDC97;display:inline-block;}
 .refresh{border:0;background:var(--blue-2);color:#fff;font-weight:700;border-radius:10px;padding:9px 14px;cursor:pointer;}
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px;}
-.kpi,.card{background:var(--card);border-radius:16px;box-shadow:0 8px 24px rgba(18,35,63,.04);}
-.kpi{padding:16px 16px 12px;display:grid;grid-template-columns:1fr 92px;gap:8px;align-items:center;}
-.kpi .lbl{color:var(--muted);font-size:.68rem;font-weight:700;letter-spacing:.06em;}
-.kpi strong{display:block;font-size:1.7rem;letter-spacing:-.03em;margin-top:4px;}
-.kpi strong small{font-size:.95rem;color:var(--muted);font-weight:600;}
-.kpi em{display:block;margin-top:4px;color:var(--muted);font-style:normal;font-size:.78rem;}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:18px;}
+.kpi,.card{background:var(--card);border-radius:18px;box-shadow:0 10px 30px rgba(18,35,63,.05);}
+.kpi{padding:18px 18px 16px;min-height:124px;}
+.kpi .lbl{color:#8E9AAB;font-size:11px;font-weight:600;letter-spacing:.07em;}
+.kpi-main{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;}
+.kpi strong{display:block;font-size:32px;font-weight:800;letter-spacing:-.045em;line-height:1;color:#12233F;}
+.kpi strong.accent{color:#2563EB;}
+.kpi strong small{font-size:18px;font-weight:500;color:#A0AAB8;letter-spacing:0;margin-left:4px;}
+.kpi em{display:block;margin-top:8px;color:#8E9AAB;font-style:normal;font-size:13px;font-weight:500;}
+.spark{width:118px;height:52px;flex:0 0 118px;}
+.spark svg{display:block;width:100%;height:100%;}
 .grid{display:grid;grid-template-columns:1fr 1.15fr;gap:14px;margin-top:14px;}
 .card{padding:18px 18px 16px;}
 .card h2{margin:0;font-size:1rem;}
@@ -104,10 +108,10 @@ tr.visit:hover td{background:#F8FBFF;}
 
   <div id="board">
     <div class="kpis">
-      <article class="kpi"><div><div class="lbl">TOTAL VISITS</div><strong id="kpi-visits">0</strong><em>Anonymous browsers</em></div><canvas id="spark-visits"></canvas></article>
-      <article class="kpi"><div><div class="lbl">AVG TIME ON PAGE</div><strong id="kpi-time">0:00</strong><em>Visible tab time only</em></div><canvas id="spark-time"></canvas></article>
-      <article class="kpi"><div><div class="lbl">AVG SECTIONS REACHED</div><strong id="kpi-sections">0.0 <small>/ 9</small></strong><em>Per visit</em></div><canvas id="spark-sections"></canvas></article>
-      <article class="kpi"><div><div class="lbl">REACHED FINAL CALL</div><strong id="kpi-final">0%</strong><em id="kpi-final-sub">0 of 0 visits</em></div><canvas id="spark-final"></canvas></article>
+      <article class="kpi"><div class="lbl">TOTAL VISITS</div><div class="kpi-main"><div class="kpi-copy"><strong id="kpi-visits">0</strong><em>Anonymous browsers</em></div><div class="spark" id="spark-visits"></div></div></article>
+      <article class="kpi"><div class="lbl">AVG TIME ON PAGE</div><div class="kpi-main"><div class="kpi-copy"><strong id="kpi-time">0:00</strong><em>Visible tab time only</em></div><div class="spark" id="spark-time"></div></div></article>
+      <article class="kpi"><div class="lbl">AVG SECTIONS REACHED</div><div class="kpi-main"><div class="kpi-copy"><strong id="kpi-sections">0.0 <small>/ 9</small></strong><em>Per visit</em></div><div class="spark" id="spark-sections"></div></div></article>
+      <article class="kpi"><div class="lbl">REACHED FINAL CALL</div><div class="kpi-main"><div class="kpi-copy"><strong id="kpi-final" class="accent">0%</strong><em id="kpi-final-sub">0 of 0 visits</em></div><div class="spark" id="spark-final"></div></div></article>
     </div>
 
     <div class="grid">
@@ -176,13 +180,31 @@ function whenLabel(iso){
   return date.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + hmText;
 }
 function spark(id, values){
-  if (charts[id]) charts[id].destroy();
-  charts[id] = new Chart(document.getElementById(id), {
-    type: 'line',
-    data: { labels: values.map(function(_, i){ return i; }), datasets: [{ data: values.length ? values : [0], borderColor: '#60A5FA', borderWidth: 2, pointRadius: 0, tension: 0.35, fill: false }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } }
+  var host = document.getElementById(id);
+  var data = (values && values.length ? values : [0, 0]).map(Number);
+  if (data.length === 1) data = [data[0], data[0]];
+  var w = 128;
+  var h = 52;
+  var min = Math.min.apply(null, data);
+  var max = Math.max.apply(null, data);
+  var span = max - min || 1;
+  var pts = data.map(function(v, i){
+    return [(i / (data.length - 1)) * w, 4 + (1 - (v - min) / span) * (h - 16)];
   });
+  var d = 'M ' + pts[0][0].toFixed(1) + ' ' + pts[0][1].toFixed(1);
+  for (var i = 0; i < pts.length - 1; i++){
+    var p0 = pts[i === 0 ? 0 : i - 1];
+    var p1 = pts[i];
+    var p2 = pts[i + 1];
+    var p3 = pts[i + 2] || p2;
+    d += ' C ' + (p1[0] + (p2[0] - p0[0]) / 6).toFixed(1) + ' ' + (p1[1] + (p2[1] - p0[1]) / 6).toFixed(1) +
+      ', ' + (p2[0] - (p3[0] - p1[0]) / 6).toFixed(1) + ' ' + (p2[1] - (p3[1] - p1[1]) / 6).toFixed(1) +
+      ', ' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1);
+  }
+  var gid = 'fill-' + id;
+  host.innerHTML = '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3B82F6" stop-opacity="0.32"/><stop offset="100%" stop-color="#3B82F6" stop-opacity="0.02"/></linearGradient></defs><path d="' + d + ' L ' + pts[pts.length - 1][0].toFixed(1) + ' ' + h + ' L 0 ' + h + ' Z" fill="url(#' + gid + ')"/><path d="' + d + '" fill="none" stroke="#3B82F6" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 }
+Chart.defaults.font.family = '"Plus Jakarta Sans", sans-serif';
 function drawAvg(sections){
   if (charts.avg) charts.avg.destroy();
   var max = 0;
@@ -212,7 +234,7 @@ function drawAvg(sections){
         var ctx = chart.ctx;
         ctx.save();
         ctx.fillStyle = '#12233F';
-        ctx.font = '600 11px Inter';
+        ctx.font = '600 11px "Plus Jakarta Sans"';
         ctx.textAlign = 'center';
         chart.getDatasetMeta(0).data.forEach(function(bar, i){
           ctx.fillText(chart.data.datasets[0].data[i] + 's', bar.x, bar.y - 6);
